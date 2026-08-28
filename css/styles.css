@@ -1,0 +1,436 @@
+/* Life — styles.
+   Bright primaries on a soft sky ground, big soft-cornered controls, and a
+   full dark palette for a dim bedroom (REQUIREMENTS U2, A4, A5). */
+
+:root {
+  color-scheme: light dark;
+
+  --bg: #E9F1FB;
+  --panel: #FFFFFF;
+  --panel-2: #F3F7FD;
+  --ink: #16233F;
+  --ink-soft: #536282;
+  --line: #CFDDF0;
+
+  --cell-dead: #FFFFFF;
+  --cell-line: #DCE7F7;
+  --cell-live: #2563EB;
+  --on-ink: #FFFFFF;   /* text on an accent-filled control */
+
+  --go: #15803D;
+  --go-ink: #FFFFFF;
+  --stop: #F59E0B;
+  --stop-ink: #3A2500;
+  --happy: #7C3AED;
+  --danger: #DC2626;
+
+  --radius: 18px;
+  --shadow: 0 2px 0 rgba(22, 35, 63, .10), 0 8px 20px -12px rgba(22, 35, 63, .45);
+  --tap: 60px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0B1220;
+    --panel: #16203A;
+    --panel-2: #1D294A;
+    --ink: #E8EEF9;
+    --ink-soft: #A3B2D0;
+    --line: #2A3A5E;
+
+    --cell-dead: #0F1930;
+    --cell-line: #21304F;
+    --cell-live: #60A5FA;
+    --on-ink: #052341;
+
+    --go: #22C55E;
+    --go-ink: #04240F;
+    --stop: #FBBF24;
+    --stop-ink: #2B1C00;
+    --happy: #A78BFA;
+    --danger: #F87171;
+
+    --shadow: 0 2px 0 rgba(0, 0, 0, .35), 0 10px 24px -14px rgba(0, 0, 0, .9);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: ui-rounded, "SF Pro Rounded", "Nunito", "Avenir Next", system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ---------- app shell ---------- */
+
+.app {
+  display: grid;
+  height: 100dvh;
+  gap: 10px;
+  padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right))
+           max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+}
+
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 0;
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+#grid {
+  display: block;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  cursor: crosshair;
+}
+
+.readout {
+  position: absolute;
+  top: 8px; left: 8px;
+  display: flex;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.stat {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel) 82%, transparent);
+  border: 2px solid var(--line);
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.stat b {
+  font-size: 20px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- controls ---------- */
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: 10px;
+  align-content: start;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: var(--tap);
+  min-width: var(--tap);
+  padding: 8px 6px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  font: inherit;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform .08s ease, filter .12s ease;
+}
+.btn .icon { width: 26px; height: 26px; fill: currentColor; }
+.btn .lbl { line-height: 1; }
+.btn:active { transform: scale(.95); }
+.btn:focus-visible { outline: 4px solid var(--cell-live); outline-offset: 3px; }
+.btn[disabled] { opacity: .4; box-shadow: none; cursor: default; }
+.btn[disabled]:active { transform: none; }
+
+.btn.btn-play {
+  grid-column: 1 / -1;
+  min-height: 84px;
+  background: var(--go);
+  color: var(--go-ink);
+  font-size: 20px;
+}
+.btn.btn-play .icon { width: 34px; height: 34px; }
+.btn.btn-play.is-running { background: var(--stop); color: var(--stop-ink); }
+
+.btn-happy { color: var(--happy); }
+.btn-danger { color: var(--danger); }
+.btn-primary { background: var(--cell-live); color: var(--on-ink); }
+
+/* ---------- segmented groups (speed, size) ---------- */
+
+.group {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+.segments {
+  display: flex;
+  flex: 1;
+  gap: 8px;
+  min-width: 0;
+}
+.seg {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--tap);
+  border: none;
+  border-radius: 12px;
+  background: var(--panel-2);
+  color: var(--ink-soft);
+  font: inherit;
+  font-weight: 700;
+  font-size: 13px;
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  cursor: pointer;
+}
+.seg:active { transform: scale(.95); }
+.seg:focus-visible { outline: 4px solid var(--cell-live); outline-offset: 2px; }
+.seg[aria-pressed="true"] { background: var(--cell-live); color: var(--on-ink); }
+.seg .emoji { font-size: 17px; line-height: 1; }
+.seg .dots { display: grid; gap: 1px; }
+.seg .dots i { display: block; background: currentColor; border-radius: 1px; }
+
+.btn-mini { min-height: var(--tap); min-width: var(--tap); padding: 0; background: var(--panel-2); box-shadow: none; }
+.btn-mini .icon { width: 22px; height: 22px; }
+.btn-mini[aria-pressed="true"] { background: var(--cell-live); color: var(--on-ink); }
+
+/* ---------- sheets ---------- */
+
+dialog { border: none; padding: 0; color: var(--ink); }
+dialog::backdrop { background: rgba(10, 18, 34, .55); }
+/* Our display rules below would otherwise beat the UA rule that hides a
+   closed dialog, leaving the panels stacked under the page. */
+dialog:not([open]) { display: none; }
+
+.sheet {
+  width: min(760px, 94vw);
+  max-height: 86dvh;
+  margin: auto;
+  border-radius: 26px;
+  background: var(--bg);
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .6);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--panel);
+  border-bottom: 2px solid var(--line);
+}
+.sheet-head h2 { margin: 0; font-size: 22px; }
+.btn-close { min-height: 52px; min-width: 52px; padding: 0; }
+.sheet-body {
+  padding: 14px 16px 20px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cat-title {
+  margin: 14px 0 8px;
+  font-size: 15px;
+  color: var(--ink-soft);
+}
+.cat-title:first-child { margin-top: 0; }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 10px;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: none;
+  border-radius: 16px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: center;
+}
+.card:active { transform: scale(.96); }
+.card:focus-visible { outline: 4px solid var(--cell-live); outline-offset: 3px; }
+.card canvas { border-radius: 10px; display: block; background: var(--cell-dead); }
+.card .nm { font-weight: 700; font-size: 14px; line-height: 1.15; }
+.card .blurb { font-size: 11px; color: var(--ink-soft); line-height: 1.25; }
+
+.card-wrap { position: relative; display: flex; flex-direction: column; }
+.card-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  justify-content: center;
+}
+.card-actions .btn { min-height: 44px; min-width: 44px; padding: 0; flex: 1; }
+.card-actions .icon { width: 20px; height: 20px; }
+
+.empty {
+  padding: 28px 12px;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* ---------- ask dialogs ---------- */
+
+.ask {
+  width: min(420px, 92vw);
+  margin: auto;
+  border-radius: 24px;
+  background: var(--panel);
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .6);
+}
+.ask form { padding: 22px; display: grid; gap: 16px; }
+.ask h2 { margin: 0; font-size: 22px; text-align: center; text-wrap: balance; }
+.ask input {
+  min-height: 56px;
+  padding: 0 14px;
+  border: 3px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 19px;
+  font-weight: 700;
+}
+.ask input:focus { outline: none; border-color: var(--cell-live); }
+.ask-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ask-buttons .btn { flex-direction: row; font-size: 16px; }
+
+/* ---------- toast ---------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 50;
+  max-width: 88vw;
+  padding: 14px 20px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 700;
+  font-size: 16px;
+  box-shadow: 0 12px 30px -12px rgba(0, 0, 0, .7);
+}
+
+/* ---------- first-run coach marks ---------- */
+
+.coach {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(10, 18, 34, .55);
+}
+.coach-card {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 12px 18px;
+  border-radius: 18px;
+  background: var(--panel);
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 18px;
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, .7);
+  animation: bob 1.6s ease-in-out infinite;
+}
+.coach-dismiss {
+  position: absolute;
+  left: 50%;
+  bottom: 6%;
+  transform: translateX(-50%);
+  margin: 0;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, .8);
+}
+
+@keyframes bob {
+  0%, 100% { translate: 0 -4px; }
+  50% { translate: 0 4px; }
+}
+
+/* ---------- responsive layout ----------
+   Last in the file on purpose: media queries add no specificity, so these
+   have to come after the component rules they override. */
+
+/* Landscape iPad: grid left, controls in a column on the right (L2). */
+@media (orientation: landscape) {
+  .app {
+    grid-template-columns: minmax(0, 1fr) clamp(216px, 25vw, 300px);
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .controls { --cols: 2; }
+}
+
+/* A phone on its side is short and wide: the same controls need a wider,
+   shallower block or the speed and size rows fall off the bottom (L4). */
+@media (orientation: landscape) and (max-height: 560px) {
+  .app {
+    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) clamp(300px, 46vw, 400px);
+  }
+  .controls { --cols: 4; gap: 6px; }
+  .group { padding: 4px; gap: 6px; }
+  .segments { gap: 6px; }
+  .btn.btn-play { min-height: 60px; font-size: 18px; }
+  .btn.btn-play .icon { width: 24px; height: 24px; }
+}
+
+/* Portrait: grid on top, controls in a bar underneath. */
+@media (orientation: portrait) {
+  .app { grid-template-rows: minmax(0, 1fr) auto; }
+  .controls { --cols: 4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+  .btn:active, .seg:active, .card:active { transform: none; }
+}

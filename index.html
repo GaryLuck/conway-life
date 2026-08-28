@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Life — a game of little squares</title>
+<meta name="description" content="Conway's Game of Life for tablets: pick a pattern, draw your own, and watch it come alive.">
+
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#EAF2FB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1220" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Life">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <defs>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15a1 1 0 0 0 1.54.84l11.2-7.5a1 1 0 0 0 0-1.68L8.54 3.66A1 1 0 0 0 7 4.5Z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 4h3.4v16H7zm6.6 0H17v16h-3.4z"/></symbol>
+    <symbol id="i-step" viewBox="0 0 24 24"><path d="M5 4.5v15a1 1 0 0 0 1.55.83L16 13.9V19a1 1 0 0 0 2 0V5a1 1 0 1 0-2 0v5.1L6.55 3.67A1 1 0 0 0 5 4.5Z"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9.7 5.3a1 1 0 0 0-1.4-1.4L3.6 8.6a1 1 0 0 0 0 1.4l4.7 4.7a1 1 0 0 0 1.4-1.42L6.8 10.5H14a4.5 4.5 0 0 1 0 9h-3a1 1 0 1 0 0 2h3a6.5 6.5 0 0 0 0-13H6.8Z"/></symbol>
+    <symbol id="i-clear" viewBox="0 0 24 24"><path d="M9 3h6a1 1 0 0 1 1 1v1h4a1 1 0 1 1 0 2h-1.1l-1 13.1A2 2 0 0 1 15.9 22H8.1a2 2 0 0 1-2-1.9L5.1 7H4a1 1 0 0 1 0-2h4V4a1 1 0 0 1 1-1Zm1 2h4v-.5h-4Zm-.5 5a1 1 0 0 1 1 1v7a1 1 0 1 1-2 0v-7a1 1 0 0 1 1-1Zm5 0a1 1 0 0 1 1 1v7a1 1 0 1 1-2 0v-7a1 1 0 0 1 1-1Z"/></symbol>
+    <symbol id="i-random" viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm3 3.6a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm-4 4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Zm8 0a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M12 2.6l2.9 5.9 6.5.95-4.7 4.58 1.1 6.47L12 17.44 6.2 20.5l1.1-6.47L2.6 9.45l6.5-.95Z"/></symbol>
+    <symbol id="i-patterns" viewBox="0 0 24 24"><path d="M4 4h5v5H4Zm11 0h5v5h-5ZM4 15h5v5H4Zm11 0h5v5h-5ZM10.5 9.5h3v5h-3Z"/></symbol>
+    <symbol id="i-mine" viewBox="0 0 24 24"><path d="M12 21s-8-4.9-8-10.2A4.8 4.8 0 0 1 12 7.4a4.8 4.8 0 0 1 8 3.4C20 16.1 12 21 12 21Z"/></symbol>
+    <symbol id="i-surprise" viewBox="0 0 24 24"><path d="M12 2l1.9 4.9L19 8.8l-5.1 1.9L12 15.6l-1.9-4.9L5 8.8l5.1-1.9Zm6.5 10.5l1 2.6 2.5 1-2.5 1-1 2.6-1-2.6-2.5-1 2.5-1Zm-13 .5l.8 2.1 2.2.8-2.2.8-.8 2.1-.8-2.1L2.5 16l2.2-.8Z"/></symbol>
+    <symbol id="i-sound-on" viewBox="0 0 24 24"><path d="M11 4.5a1 1 0 0 0-1.6-.8L5.7 7H3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h2.7l3.7 3.3a1 1 0 0 0 1.6-.8Zm3.4 2.3a1 1 0 0 1 1.4.1 7.7 7.7 0 0 1 0 10.2 1 1 0 1 1-1.5-1.3 5.7 5.7 0 0 0 0-7.6 1 1 0 0 1 .1-1.4Zm3-3a1 1 0 0 1 1.4.1 12 12 0 0 1 0 16.2 1 1 0 1 1-1.5-1.4 10 10 0 0 0 0-13.5 1 1 0 0 1 .1-1.4Z"/></symbol>
+    <symbol id="i-sound-off" viewBox="0 0 24 24"><path d="M11 4.5a1 1 0 0 0-1.6-.8L5.7 7H3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h2.7l3.7 3.3a1 1 0 0 0 1.6-.8Zm4.3 4.8a1 1 0 0 1 1.4 0L18.5 11l1.8-1.7a1 1 0 1 1 1.4 1.4L20 12.4l1.7 1.8a1 1 0 0 1-1.4 1.4l-1.8-1.8-1.8 1.8a1 1 0 0 1-1.4-1.4l1.7-1.8-1.7-1.7a1 1 0 0 1 0-1.4Z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.2 4.8 12 10.6l5.8-5.8a1 1 0 1 1 1.4 1.4L13.4 12l5.8 5.8a1 1 0 0 1-1.4 1.4L12 13.4l-5.8 5.8a1 1 0 0 1-1.4-1.4L10.6 12 4.8 6.2a1 1 0 0 1 1.4-1.4Z"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M16.9 2.8a2.7 2.7 0 0 1 3.8 3.8L9.3 18 4 20l2-5.3ZM15 6.5 17.5 9"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M9 3h6a1 1 0 0 1 1 1v1h4a1 1 0 1 1 0 2h-1.1l-1 13.1A2 2 0 0 1 15.9 22H8.1a2 2 0 0 1-2-1.9L5.1 7H4a1 1 0 0 1 0-2h4V4a1 1 0 0 1 1-1Z"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <main class="stage" id="stage">
+    <canvas id="grid" width="300" height="300"
+            aria-label="Game of Life grid. Touch or click cells to draw."></canvas>
+    <div class="readout" id="readout">
+      <span class="stat"><b id="gen">0</b><span>rounds</span></span>
+      <span class="stat"><b id="pop">0</b><span>alive</span></span>
+    </div>
+  </main>
+
+  <nav class="controls" aria-label="Game controls">
+    <button class="btn btn-play" id="btn-play" aria-label="Play">
+      <svg class="icon" aria-hidden="true"><use href="#i-play"></use></svg>
+      <span class="lbl" id="btn-play-label">Play</span>
+    </button>
+
+    <button class="btn" id="btn-step" aria-label="One step">
+      <svg class="icon" aria-hidden="true"><use href="#i-step"></use></svg><span class="lbl">Step</span>
+    </button>
+    <button class="btn" id="btn-undo" aria-label="Undo">
+      <svg class="icon" aria-hidden="true"><use href="#i-undo"></use></svg><span class="lbl">Undo</span>
+    </button>
+
+    <button class="btn btn-happy" id="btn-patterns" aria-label="Choose a pattern">
+      <svg class="icon" aria-hidden="true"><use href="#i-patterns"></use></svg><span class="lbl">Shapes</span>
+    </button>
+    <button class="btn btn-happy" id="btn-surprise" aria-label="Surprise me">
+      <svg class="icon" aria-hidden="true"><use href="#i-surprise"></use></svg><span class="lbl">Surprise</span>
+    </button>
+
+    <button class="btn btn-happy" id="btn-mine" aria-label="My patterns">
+      <svg class="icon" aria-hidden="true"><use href="#i-mine"></use></svg><span class="lbl">Mine</span>
+    </button>
+    <button class="btn btn-happy" id="btn-save" aria-label="Save this pattern">
+      <svg class="icon" aria-hidden="true"><use href="#i-save"></use></svg><span class="lbl">Save</span>
+    </button>
+
+    <button class="btn" id="btn-random" aria-label="Fill with random cells">
+      <svg class="icon" aria-hidden="true"><use href="#i-random"></use></svg><span class="lbl">Mix up</span>
+    </button>
+    <button class="btn btn-danger" id="btn-clear" aria-label="Clear the grid">
+      <svg class="icon" aria-hidden="true"><use href="#i-clear"></use></svg><span class="lbl">Clear</span>
+    </button>
+
+    <div class="group" role="group" aria-label="Speed" id="speed-group">
+      <div class="segments" id="speed-segments"></div>
+    </div>
+
+    <div class="group" role="group" aria-label="Cell size" id="size-group">
+      <div class="segments" id="size-segments"></div>
+      <button class="btn btn-mini" id="btn-sound" aria-label="Turn sound on" aria-pressed="false">
+        <svg class="icon" aria-hidden="true"><use href="#i-sound-off" id="sound-icon"></use></svg>
+      </button>
+    </div>
+  </nav>
+</div>
+
+<!-- Pattern picker -->
+<dialog class="sheet" id="patterns-sheet" aria-labelledby="patterns-title">
+  <div class="sheet-head">
+    <h2 id="patterns-title">Pick a shape</h2>
+    <button class="btn btn-close" data-close aria-label="Close">
+      <svg class="icon" aria-hidden="true"><use href="#i-close"></use></svg>
+    </button>
+  </div>
+  <div class="sheet-body" id="patterns-body"></div>
+</dialog>
+
+<!-- Saved patterns -->
+<dialog class="sheet" id="mine-sheet" aria-labelledby="mine-title">
+  <div class="sheet-head">
+    <h2 id="mine-title">My shapes</h2>
+    <button class="btn btn-close" data-close aria-label="Close">
+      <svg class="icon" aria-hidden="true"><use href="#i-close"></use></svg>
+    </button>
+  </div>
+  <div class="sheet-body" id="mine-body"></div>
+</dialog>
+
+<!-- Save / rename -->
+<dialog class="ask" id="name-dialog" aria-labelledby="name-title">
+  <form method="dialog">
+    <h2 id="name-title">Name your shape</h2>
+    <input id="name-input" type="text" maxlength="40" autocomplete="off"
+           autocapitalize="words" spellcheck="false" aria-label="Pattern name">
+    <div class="ask-buttons">
+      <button class="btn btn-primary" value="ok" id="name-ok">Save it</button>
+      <button class="btn" value="cancel">Never mind</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Confirm -->
+<dialog class="ask" id="confirm-dialog" aria-labelledby="confirm-title">
+  <form method="dialog">
+    <h2 id="confirm-title">Are you sure?</h2>
+    <div class="ask-buttons">
+      <button class="btn btn-danger" value="yes" id="confirm-yes">Yes</button>
+      <button class="btn btn-primary" value="no" id="confirm-no">No</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="sr-only" id="announcer" role="status" aria-live="polite"></div>
+
+<div class="coach" id="coach" hidden>
+  <div class="coach-card" id="coach-grid"><span>Draw here!</span></div>
+  <div class="coach-card" id="coach-play"><span>Press play</span></div>
+  <div class="coach-card" id="coach-shapes"><span>Try a shape</span></div>
+  <p class="coach-dismiss">Tap anywhere to start</p>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

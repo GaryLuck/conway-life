@@ -1,0 +1,15 @@
+{
+  "name": "conway-life",
+  "version": "1.0.0",
+  "description": "Conway's Game of Life for iPads, built for a six-year-old to use alone.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test",
+    "icons": "node scripts/make-icons.mjs",
+    "start": "node --version >/dev/null && python3 -m http.server 8080"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.1"
+  }
+}

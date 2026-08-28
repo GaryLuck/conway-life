@@ -1,6 +1,6 @@
 # Conway's Game of Life — Requirements (for review)
 
-**Status:** Draft for approval · **Target device:** iPad (Safari), also works on desktop/phone
+**Status:** Approved 2026-08-28 — implemented · **Target device:** iPad (Safari), also works on desktop/phone
 **Primary users:** a six-year-old child (unassisted) and an adult/older sibling (full feature set)
 
 ---
@@ -185,10 +185,31 @@ Plus: `npm test` script (no dependencies), and everything committed to `claude/c
 
 ---
 
-## 11. Open Questions (defaults I'll use if you don't object)
+## 11. Decisions (approved 2026-08-28)
 
-1. **Toroidal wrap-around edges** — default yes (§S3). Alternative: cells die at the edge.
-2. **Share-by-link** (pattern encoded in the URL, so a saved pattern can be texted to a grandparent) — default **not** in v1. Say the word and I'll add it.
-3. **Colour theme** — default is a bright primary palette (blue/green/orange). Any preference, or a favourite colour of the child's?
-4. **Sound default** — currently off until toggled on. Happy to flip to on-by-default.
-5. **PWA / add-to-home-screen** (app icon on the iPad home screen, launches fullscreen with no Safari chrome) — default **not** in v1, but it is ~30 lines (manifest + icon). It notably improves the kid experience; recommend adding.
+1. **Toroidal wrap-around edges** — yes (§S3).
+2. **Share-by-link** — not in v1.
+3. **Colour theme** — bright primaries (blue / green / purple accents) with a full dark palette.
+4. **Sound default** — off until toggled on, remembered thereafter.
+5. **PWA / add-to-home-screen** — **approved and included**: see §12.
+
+## 12. PWA support (approved addition)
+
+| # | Requirement |
+|---|---|
+| W1 | A web app manifest with name, icons, `display: standalone`, and theme colours matching the light and dark palettes. |
+| W2 | Generated PNG icons at 192, 512 (both `any` and `maskable`) and a 180 px `apple-touch-icon`, produced by a checked-in script rather than binary assets edited by hand. |
+| W3 | iOS meta tags so Add to Home Screen launches fullscreen with no Safari chrome. |
+| W4 | A cache-first service worker that makes the whole app work offline, registered only over http/https so opening the file from disk still works. |
+| W5 | All paths relative, so the app works from a GitHub Pages project subpath. |
+
+## 13. Notes on delivery
+
+- The pattern library ships **18** patterns; P4 asked for a minimum of 17 and named 18.
+- L4 (responsiveness) needed one extra layout beyond the two in L2: a phone held
+  in landscape is short and wide, and the controls need a wider, shallower block
+  there or the speed and size rows fall below the fold. Verified at nine viewport
+  sizes from 320x568 to 1920x1080.
+- S9 asked for 60 fps at 9,600 cells on Turbo. The small preset on an iPad-sized
+  viewport is 120x112 = 13,440 cells, and it holds 60 fps with no frame over
+  20 ms.
